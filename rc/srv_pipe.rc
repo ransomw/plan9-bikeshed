@@ -1,0 +1,15 @@
+#! /bin/rc
+
+## from kvik
+
+rm -f /srv/postpipe
+bind '#|' /n/pipe
+<>[3]/n/pipe/data1 </n/pipe/data {
+	echo 3 >/srv/postpipe
+	while(ln = `{read})
+		echo $ln
+}
+
+
+# append to /srv/postpipe with >>
+# 	echo hi >>/srv/postpipe

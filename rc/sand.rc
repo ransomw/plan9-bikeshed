@@ -1,0 +1,278 @@
+#!/bin/rc
+# following along with /sys/doc/rc.ps
+
+## patterns
+echo '-- patterns --'
+### * globs as in bash
+### ? matches single characters
+ls /?in/?am # /bin/sam
+### [] classes
+ls /bin/[a-s]am # /bin/sam
+ls /bin/[a-o] # /bin/g
+ls /bin/s[~a]m # /bin/sum
+
+## variables: arrays of strings
+echo '-- variables --'
+
+path=(. /bin)
+user=arw
+
+echo $path # . /bin
+echo $user # arw
+
+### indexing into an array
+echo $path(1) # .
+echo $path(2) # /bin
+echo $path(1 2 1) # . /bin .
+echo $user(1) # arw
+
+### counting array items
+
+empty=()
+null=''
+
+echo $#path # 2
+echo $#user # 1
+echo $#empty # 0
+echo $#null # 1
+
+### flatten list
+flatpath=$"path
+echo $#path $#flatpath # 2 1
+
+## args: * is args vec, 0 is script path
+echo '-- args --'
+
+echo $* # all the params
+echo $*(1) # the first param
+echo $1 # equivalent to prev
+echo $0 # script path
+##### echo $*(0) is /not/ equiv to prev
+echo $#* # parameter count
+
+## concatenation: ^ operator
+echo '-- concatenation --'
+
+
+echo asdf^qwer # 
+# echo (a s d)^(q w)
+##### > mismatched list lengths in concatenation
+zip=(a s d)^(q w e)^(z x c)
+echo $zip(1 2) # aqz swx
+echo asdf^$user # asdfarw
+##### view this as an implicit asdf^$user
+echo asdf$user # asdfarw
+echo $user^asdf # arwasdf
+echo $userasdf # 
+echo (a)^(b c) # ab ac
+
+##### more implicit carats
+echo 'asdf'qwer # asdfqwer
+echo $user'asdf' # arwasdf
+echo $user.rc # arw.rc
+##### on `, ', $ after a quoted or unquoted words
+##### or on any non-[a-z0-9] character ('.' above)
+
+## command sub: `{cmd}
+### count lines in the first two files in /bin
+wc -l `{ls /bin | sed 2q}
+##### $ifs determines how the input is put into an array
+#####  and defaults to a space, tab, and newline,
+#####  all in one string (input file seperators)
+echo '- $ifs -'
+echo `{ls /bin | sed 2q} # /bin/" /bin/""
+##### sets ifs for one command only.
+##### ifs= on a separate line sets for entire script
+ifs='bn' echo `{ls /bin | sed 1q} # / i /"
+echo `{ls /bin | sed 2q} # /bin/" /bin/""
+
+## pipeline branching:         <{cmd} and >{cmd} become
+##   file descriptors with cmd stdout and stdin
+echo '-- pipeline branching --'
+##### these files are not seekable
+
+cmp <{echo asdf} <{echo qwer} # /fd/6 /fd/5 differ: char 1
+echo asdf > >{sed s/as/df/ | cat} # dfdf
+
+##### exit status
+echo '-- exit status --'
+echo asdf | sed s/sd/as/ | grep ass
+echo $status # |grep 11816: no matches
+echo asdf | sed s/sd/as/ | grep as 
+echo $status # |
+
+##### command grouping: in place of a single command
+{echo '-- command grouping --'; echo $*}
+
+## for
+echo '-- for --'
+
+for(p in $path) echo $p
+# .
+# /bin
+
+##### implicit one-line blocks like C
+for(p in one two)
+echo $p
+# one
+# two
+
+for(p in one two) {
+    echo $p
+    echo $p!
+}
+# one
+# one!
+# two
+# two!
+
+##### implicit 'in $*'
+for(param) echo $param
+
+## if: conditional on whether command produces error
+##### ??? based on $status?
+echo '-- if --'
+
+if(echo asdf | grep as >/dev/null) echo asdf # prints
+if(echo asdf | grep qwer) echo qwer # doesn't print
+
+##### `test` is particularly useful
+
+if(test $#* -ne 0) echo 'got args '`{echo $*}
+##### ??? more idiomatic way to flatten arrays?
+
+## while: a lot like if
+echo '-- while --'
+
+## switch: pattern match
+echo '-- switch --'
+
+switch(sam) {
+case q*
+    echo 'nerp'
+case s[a-z]?
+    echo 'yerp'
+case *
+    echo 'default'
+}
+
+### the builtin ~ is also mentioned here
+### for matching a strying
+
+~ asdf qwer q* as?; echo $status # no match
+if (~ $user ?rw) echo yep # yep
+
+## functions: pattern match
+echo '-- functions --'
+
+fn test_fn {
+    echo $#* $1 $*(2) $0
+}
+
+test_fn xcvz vcxz # 2 xcvz vcxz ./iscript/sand.rc
+
+##### delete function definition
+fn test_fn
+
+# test_fn xcvz
+# > test_fn: '/bin/test_fn' directory entry not found
+
+## command execution
+echo '-- command execution --'
+### (descending priority order) functions, builtins, $path
+
+fn ls {echo 'april fools!'}
+# fn ~ {echo 'april fools!!!'}
+
+ls # april fools!
+# ~
+
+fn ls 
+# fn ~ 
+
+## builtins
+echo '-- builtins --'
+
+### .
+echo '- . -'
+. iscript/subsand.rc
+# . -i iscript/subsand.rc
+##### -i causes $prompt to be printed before each command
+#####  ... ??? what's this for?
+
+### builtin: ignore functions
+echo '- builtin -'
+fn ls {echo 'april fools!'}
+ls /bin | sed 1q # april fools!
+builtin ls /bin | sed 1q # /bin/"
+
+##### particularly useful for defining alias-like functions
+fn ls { builtin ls -l $* }
+ls /bin | sed 1q # --rwxrwxr-x M 26 sys    sys         443 Nov  8  2013 /bin/"
+fn ls
+
+### cd, eval, exec, exit
+echo '- cd, eval, exec, exit -'
+
+### flag: check, set, and unset flags to rc itself
+
+##### set -v if -x is already set
+# if(flag x) flag v +
+##### unset -v if -x is already set
+# if(flag x) flag v -
+
+### rfork
+### shift
+echo '- shift -'
+
+fn schwifty {
+    echo $*(2)
+    shift 2
+    echo $*(1)
+}
+
+schwifty asdf qwer zxcv # qwer # zxcv
+
+### wait [pid]: wait for specified process's or all processes' exit
+
+### whatis: generalized 'type' and 'which'
+echo '- whatis -'
+whatis path cd who # path=(/bin .) # builtin cd # /bin/who
+
+### ~:
+echo '- ~ -'
+##### 'a' is a single character
+if (~ a ?) echo 'of course' # of course
+##### use quotes to match pattern characters
+pas='parle?' if (~ $pas parle'?') echo 'tricky' # tricky
+
+## advanced i/o redirection
+echo '-- advanced i/o redirection --'
+
+##### `bash` ~=~ {rc}
+##### `2>` ~=~ {>[2]}
+##### `2>&1 > out` ~=~ {>[2=1] >out}
+
+echo "asdf" >[1=] # echo: write error: fd out of range or not open
+##### omitting the 'to' fd closes the 'from' fd
+
+##### redirection also works thru pipes
+sed /asdf/ |[2] sed 's/.*: //' # /asdf/
+##### since {sed /asdf/} prints 
+##### 'sed: Unrecognized command: /asdf/'
+##### to stderr (file descriptor 2)
+
+##### finally, note that fd's other than 0(in) 1(out) and 3(err)
+##### are legal for pipes, e.g.
+##### {cmd 1 |[3=4] cmd2} pipes cmd1's 3 to cmd2's 4
+
+## Here documents
+echo '-- Here documents --'
+
+grep here <<!
+herehere
+thurthur
+!
+# herehere
+
+##### {<<[3]!} redirects to fd 3 rather than stdin

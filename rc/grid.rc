@@ -1,0 +1,11 @@
+#!/bin/rc
+# connect to a grid filesystem
+# use like
+#	; `{$argv0 | grep <fs-name>}
+
+srv tcp!registry.9gridchan.org!6675 registry /mnt/registry
+
+cat /mnt/registry/index |grep exportfs |sed 's/^/srv -c /g' |sed 's/is //g' |sed 's/mountpoint //g' |sed 's/service.*$//g'
+
+# wip -- ftp lines
+awk '/lftpd/{print "ftpfs -/", $1}' /mnt/registry/index

@@ -1,0 +1,4 @@
+#!/bin/rc
+# switch audio to headphones
+
+cat /dev/audiostat  | grep hpout | sed 's/([^ ]* [^ ]*).*/\1/' > /dev/audioctl

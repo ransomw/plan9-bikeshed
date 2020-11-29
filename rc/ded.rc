@@ -1,0 +1,27 @@
+#! /bin/rc
+
+first_param=$*(1)
+
+if(! ~ $first_param [0-9][0-9]*) {
+	some_prog=$first_param
+	some_pid=`{ps -e | grep $some_prog | sed 's/[^ ]+ +([^ ]+).*/\1/'}
+	if (~ $some_pid '') {
+		echo 'no program named ''' ^ $some_prog ^ ''' running'
+		exit
+	}
+}
+if not {
+	some_pid=$first_param
+### todo: get program name
+}
+
+#echo $some_pid
+
+#exit
+
+kill $some_pid
+acid $some_pid <<!
+kill($some_pid)
+!
+
+echo 'killed and acid-killed pid ' ^ $some_pid

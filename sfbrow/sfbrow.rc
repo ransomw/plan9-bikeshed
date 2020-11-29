@@ -1,0 +1,28 @@
+#! /bin/rc
+
+## todos
+#
+# hit list .. or since symlinks can create a hitlist,
+# "designated directory" flag: takes names and absolute paths
+# and a Menu can navigate directly to those paths by name
+# (e.g. the directory containing symlinks)
+# and a "paramed script" command <-- HERE
+# (e.g. create a symlink).
+# with this, selacts, become part of the porcelain:
+# plumb, snarf and so on can all be done by scripts.
+#
+# entscript to cat a file's contents to a new window
+
+echo 'starting plumber'
+# learn more about how to invoke plumber in shell scripts
+plumber
+
+proj_dir=/usr/glenda/ws/cleaves/sfbrow/
+
+# N.B. rc scripts need +x flag set
+$proj_dir^'main.out' \
+	-s enter:$proj_dir^'entscripts/enter.rc' \
+	-s snarf:$proj_dir^'entscripts/snarf.rc' \
+	-s plumb:$proj_dir^'entscripts/plumb.rc' \
+	-s trash:$proj_dir^'entscripts/trash.rc' \
+	-d start:.

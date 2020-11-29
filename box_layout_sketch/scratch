@@ -1,0 +1,53 @@
+
+there is no one true way of defining boxes within a box, although
+coordinates based on percentages (e.g. percent width), is a place
+to start.  so one place where this notepad diverges from elementile
+is the way rectangles are divvied up.
+No attempt is to be made at this time to fully generalize the
+box subdividivision problem, although percentages alone are not
+sufficient.  We also need fixed units (pixels) as well as a notion
+of fit contents -- e.g. the current path needs to determine not only
+the height of the path box but the entire top nav area.
+
+
+//////
+Layout l;
+LayoutT lt;
+Rectangle nilRectangle;
+
+// desired
+//// leaves up
+switch() {
+	case BOX_PER:
+		return nilRectangle;
+	case BOX_PIX:
+		if(lt == L_LEAF)
+			return cl->v.box;
+		else
+			return cl->v.box;
+	case BOX_FIT:
+		if(lt == L_LEAF)
+			return cl->v.boxfn(lv);
+		else
+			terminate("impl err");
+}
+
+
+//// root down
+Rectangle rr; // return rectangle
+Rectangle pb; // parent box
+switch() {
+	case BOX_PER:
+		rr.min.x = cl->v.box.min.x * Dx(pb) + pb.min.x;
+		rr.min.y = cl->v.box.min.y * Dy(pb) + pb.min.y;
+		rr.max.x = cl->v.box.max.x * Dx(pb) + pb.min.x;
+		rr.max.y = cl->v.box.max.y * Dy(pb) + pb.min.y;
+		return rr;
+	case BOX_PIX:
+	case BOX_FIT:
+}
+
+
+// actual
+//// leaves up
+//// root down

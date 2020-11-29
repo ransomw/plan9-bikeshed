@@ -1,0 +1,11 @@
+#! /bin/rc
+
+entext=$*(1)
+
+if(test -d $entext){
+	endir=$entext
+}; if not {
+	endir=`{echo $entext |sed 's@/[^/]*$@@'}
+}
+
+window -m -cd $endir

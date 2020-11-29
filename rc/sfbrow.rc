@@ -1,0 +1,77 @@
+#! /bin/rc
+
+## globals and defns
+
+all_preconfig_names=()
+
+all_preconfig_names=($all_preconfig_names 'grid')
+fn preconfig_grid {
+	echo 'running grid preconfig'
+	# todo: dupe grid.rc usage as function(s)
+	cmd=`{iscript/grid.rc |grep disk}
+	if (~ $cmd '') { echo 'nein disk' };if not {
+		$cmd
+	}
+	cmd=`{iscript/grid.rc |grep ram}
+	if (~ $cmd '') { echo 'nein ram' };if not {
+		$cmd
+	}
+	init_dir=/n/griddisk
+	echo 'grid preconfig in-place'
+}
+
+## parse args
+
+init_dir=.
+preconfig_names=()
+
+#
+
+fn usage {
+	# todo: [ init_dir ... ] -- i.e. start multiple
+	# windows in multiple initial directories
+	>[1=2] echo usage: $argv0 '[ -p preconfig ] [ init_dir ]'
+	>[1=2] echo -n 'where preconfig is among'
+	for(preconfig_name in $all_preconfig_names) {
+		echo -n ' '''^$preconfig_name^''''
+	}
+	>[1=2] echo
+	exit usage
+}
+
+while(~ $1 -*){
+	switch($1){
+	case -p
+		preconfig_names=($preconfig_names $2)
+		shift
+	case *
+		usage
+	}
+	shift
+}
+
+if(~ $#* 1){
+	init_dir=$*(1)
+}; if not if(! ~ $#* 0){
+	usage
+}
+
+echo 'parsed args'
+
+## main
+
+for(preconfig_name in $preconfig_names) {
+	echo 'running pre-config ' ^ $preconfig_name
+	# todo: usage if preconfig_name not in all_preconfig_names
+	#	(i.e. reverse lookup pattern for rc like zsh)
+	preconfig_$preconfig_name
+}
+
+# todo: block on plumber startup
+echo 'starting plumber'
+plumber
+echo 'changing to init dir '^$init_dir
+cd $init_dir
+# todo: parameterize executable location,
+#	at which point this is a generalized executable wrapper
+$home/ws/cleaves/sfbrow/sfbrow.rc

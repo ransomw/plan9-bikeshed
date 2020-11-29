@@ -1,0 +1,35 @@
+#! /bin/rc
+
+bkuprt = /shr/sdUfed34/bkup
+
+if(! test -d $bkuprt) {
+	echo 'backup directory ' ^ $bkuprt ^ ' not found' >[1=2]
+	exit 'bkup-dir'
+}
+
+tstamp=`{date -i | sed 's/^..//' | sed 's/-//g'} ^ \
+	`{date | sed 's/[^ ]* [^ ]* [^ ]* //' | \
+		sed 's/([^ ]*).*/\1/' | \
+		sed 's/([^:]*):([^:]*):[^:]*/\1\2/'}
+
+odir = $bkuprt/stardate-$tstamp
+
+if(test -d $odir) {
+	echo 'output directory ' ^ $odir ^ ' already exists' >[1=2]
+	exit 'odir'
+}
+
+mkdir $odir
+
+for(dn in iscript mtmp ws) {
+	ozip = $odir/$dn^'.tar.gz'
+	if(test -x $ozip) {
+		echo 'output file ' ^ $ozip ^ ' already exists' >[1=2]
+		exit 'ozip'
+	}
+	tarfile = $home/tmp/$dn^'.tar'
+	tar c $home/$dn > $tarfile
+	gzip -c $tarfile > $ozip
+	rm $tarfile
+	echo $ozip
+}

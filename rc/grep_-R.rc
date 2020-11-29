@@ -1,0 +1,4 @@
+#! /bin/rc
+
+grep -i `{du .}
+

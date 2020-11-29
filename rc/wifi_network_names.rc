@@ -1,0 +1,9 @@
+#! /bin/rc
+
+bind -a '#l1' /net
+cat /net/ether1/ifstats | \
+	grep '^node' | \
+	sed 's/^node: //' | \
+	sed 's/[^ ]+ [^ ]+ //' | \
+	sed 's/[^ ]+ +[^ ]+ //' | \
+	grep .

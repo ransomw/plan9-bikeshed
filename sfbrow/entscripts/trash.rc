@@ -1,0 +1,11 @@
+#! /bin/rc
+
+entext=$*(1)
+
+echo $entext
+
+if(! test -f $entext){
+	exit 0
+}
+
+mv $entext /usr/glenda/trash

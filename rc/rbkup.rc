@@ -1,0 +1,22 @@
+#!/bin/rc
+
+## backup script
+
+# replica root (server)
+rrt = $home^'/replica/'
+
+for(dn in iscript mtmp ws) {
+	if (! test -d $rrt ^ $dn) {
+		echo 'making dir'
+		mkdir $rrt ^ $dn
+	}
+	bind $home^'/'^$dn $rrt^$dn
+}
+
+# replica root (client)
+crt = $home^'/tmp/replica/'
+if (! test -d $crt) {
+	mkdir $crt
+}
+bind /shr/sdUfed34/replica $crt
+

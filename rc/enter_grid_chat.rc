@@ -1,0 +1,15 @@
+#!/bin/rc
+# chat on the plan9 grid
+
+srv tcp!registry.9gridchan.org!6675 registry /mnt/registry
+
+addr=`{cat /mnt/registry/index | grep gridchat | grep exportfs | sed 's/ .*//'}
+
+srv -c $addr gridchat /n/chat
+
+
+label gridchat
+
+#. iscript/chat.rc_orig -n ransom
+. iscript/chat.rc -n ransom
+

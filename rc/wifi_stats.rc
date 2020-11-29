@@ -1,0 +1,5 @@
+#! /bin/rc
+
+
+bind -a '#l1' /net
+cat /net/ether1/ifstats | grep -v '^node'

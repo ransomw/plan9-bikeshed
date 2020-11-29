@@ -1,0 +1,5 @@
+#! /bin/rc
+
+entext=$*(1)
+
+echo -n $entext > /dev/snarf

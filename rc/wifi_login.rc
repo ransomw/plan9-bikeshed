@@ -1,0 +1,72 @@
+#! /bin/rc
+
+# usage:
+# argv0 <network_name>
+#
+# be careful to quote special characters
+
+ps -e | grep -s 'wpa$'
+if (~ $status '|') {
+	echo 'wpa already running'
+	exit 'existing wpa'
+}
+
+bind -a '#l1' /net
+
+network_name=''^$*(1)
+
+# echo $#*
+# echo $#network_name
+
+cat /mnt/factotum/ctl | grep -s 'essid=''?' ^ $network_name
+if (! ~ $status '|') {
+	echo $network_name ^ ' creds not in factotum ... enter passwd'
+	network_pass=`{read}
+	# sometimes shell errors
+	# > rc: null list in concatenation
+	echo 'key proto=wpapsk essid=' ^ $network_name ^ \
+		' !password=' ^ $network_pass > /mnt/factotum/ctl
+	echo 'stored password in factotum'
+}
+
+echo 'logging into ''' ^ $network_name ^ ''''
+
+network_bssid=`{cat /net/ether1/ifstats | \
+	grep '^node' | \
+	sed 's/^node: //' | \
+	grep $network_name ^ '$' | \
+	sed 's/^([^ ]+) .*$/\1/'}
+
+echo 'with bssid ''' ^ $network_bssid ^ ''''
+
+
+echo essid '''' ^ $network_name ^ '''' > /net/ether1/clone
+echo bssid $network_bssid > /net/ether1/clone
+
+echo 'bssid set...  check stats:'
+cat /net/ether1/ifstats | grep '^.ssid'
+
+# possibly
+# ip/ipconfig ether /net/ether1 unbind
+
+aux/wpa /net/ether1
+if (! ~ $status '') {
+	echo 'wpa fail ' ^ $status
+	exit 'auth'
+}
+
+echo 'wpa ran with nominal status'
+assoc_status = `{cat /net/ether1/ifstats | \
+	 grep '^status' | sed 's/status: //'}
+echo 'association status (auth) ' ^ $assoc_status
+
+
+ip/ipconfig ether /net/ether1
+
+# cat /net/ndb
+# ip/ipconfig -g 192.168.0.1 ether /net/ether1 192.168.1.115 255.255.255.0
+# echo -n refresh > /net/dns
+# cat /net/log ### hold open for debug info
+#
+# echo flush >/net/iproute
+# then rerun ipconfig

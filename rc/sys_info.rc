@@ -1,0 +1,35 @@
+#! /bin/rc
+
+# BurnZeZ's sysinfo commands
+
+cd '#ec'; for(i in *){echo $i '=' `{cat $i}}
+cat '#'P/archctl
+cat '#'P/irqalloc
+cat '#'P/ioalloc
+cat '#'c/config
+cat '#'c/sysstat
+cat '#'¶/swap
+awk /^Plan 9/{p=1} /^init: starting/{exit} {if(p)print} '#'c/kmesg
+pci -v
+aux/cpuid
+aux/icanhasmsi
+aux/icanhasvmx -v
+aux/pcmcia
+cat '#'u/usb/ctl
+cat '#'S/sdctl
+cat '#'S/sdE0/ctl
+cat '#'S/sdE1/ctl
+cat '#'S/sdE2/ctl
+cat '#'S/sdE3/ctl
+cat '#'S/sdN0/ctl
+cat '#'l0/ether0/addr
+cat '#'l0/ether0/stats
+cat '#'l0/ether0/ifstats
+cat '#'l1/ether1/addr
+cat '#'l1/ether1/stats
+cat '#'l1/ether1/ifstats
+cat '#'v/vgactl
+xd -x1 '#'r/nvram
+cat '#'A/audiostat
+cat '#'A/volume
+cat /mnt/apm/ctl

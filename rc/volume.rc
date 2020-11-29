@@ -1,0 +1,17 @@
+#!/bin/rc
+# set volume
+
+v=$*(1)
+
+## default
+if(test $#v -eq 0) v=30
+
+~ $v [0-9] [0-9][0-9] 100
+v_ok=$status
+
+if(~ $v_ok 'no match') {
+    echo 'volume must be counting number, 0-100'
+    exit
+}
+
+echo master $v $v > /dev/volume 

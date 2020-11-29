@@ -1,0 +1,24 @@
+#!/bin/rc
+# everybody loves the radio
+### todo: playlist stuffs
+
+srv tcp!registry.9gridchan.org!6675 registry /mnt/registry
+
+pubregistry_addr=`{cat /mnt/registry/index | grep pubregistry | grep exportfs | sed 's/ .*//'}
+srv -c $pubregistry_addr pubregistry /n/pubregistry
+
+radio_line=`{cat /n/pubregistry/index | grep UFORADIO}
+
+addr=`{echo $radio_line |sed 's/ .*//'}
+service=`{echo $radio_line |sed 's/^.* is ([^ ]+).*$/\1/'}
+mountpoint=`{echo $radio_line |sed 's/^.* mountpoint ([^ ]+).*$/\1/'}
+
+# echo $addr $service $mountpoint
+
+srv -c $addr $service $mountpoint 
+
+cat $mountpoint/playing & # | tail -1
+
+play $mountpoint/radio
+
+##### $mountpoint/playing is also available to cat for titles

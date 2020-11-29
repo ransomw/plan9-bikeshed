@@ -1,0 +1,9 @@
+#! /bin/rc
+
+bind -a '#l1' /net
+
+stats_raw=`{cat /net/ether1/ifstats | grep '^node'}
+
+echo $stats_raw
+
+

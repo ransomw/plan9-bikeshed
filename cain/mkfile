@@ -1,0 +1,4 @@
+</$objtype/mkfile
+
+%.$O:	%.c
+	$CC $CFLAGS $stem.c
